@@ -1,0 +1,10 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+backend/.coverage
+backend/htmlcov/
+backend/*.egg-info/
+backend/data/catalog.json

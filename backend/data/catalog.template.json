@@ -1,0 +1,36 @@
+{
+  "cafes": [
+    {
+      "name": "검수된 카페 이름",
+      "address": "서울특별시 또는 경기도의 전체 주소",
+      "latitude": 37.0,
+      "longitude": 127.0,
+      "phone_number": "",
+      "business_hours": "매일 10:00-20:00",
+      "price_range": "medium",
+      "parking_available": true,
+      "tags": ["riverside", "scenic_drive"],
+      "source_url": "https://공식-카페-웹사이트-또는-공식-채널"
+    }
+  ],
+  "courses": [
+    {
+      "name": "검수된 드라이브 코스 이름",
+      "region": "서울",
+      "summary": "운영자가 작성한 코스 설명",
+      "estimated_duration_minutes": 120,
+      "estimated_distance_meters": 45000,
+      "drive_suitability_score": 4.5,
+      "waypoints": [
+        {
+          "sequence": 1,
+          "name": "경유지 이름",
+          "latitude": 37.0,
+          "longitude": 127.0,
+          "waypoint_type": "scenic"
+        }
+      ],
+      "cafe_names": ["검수된 카페 이름"]
+    }
+  ]
+}
