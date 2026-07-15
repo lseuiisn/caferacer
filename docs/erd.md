@@ -1,111 +1,94 @@
-# MVP ERD 및 데이터 모델
+# WayPoint 전체 ERD
 
-## 관계도
+## 현재 구현된 핵심 관계
 
 ```mermaid
 erDiagram
-    USERS ||--o{ USER_IDENTITIES : has
+    USERS ||--o{ USER_IDENTITIES : links
     USERS ||--o{ USER_CONSENTS : agrees
-    USERS ||--o{ FAVORITES : saves
-    USERS ||--o{ CAFE_REVIEWS : writes
     USERS ||--o{ DRIVE_RECORDS : owns
-    USERS ||--o{ RECOMMENDATION_REQUESTS : requests
     CAFES ||--o{ CAFE_IMAGES : has
-    CAFES ||--o{ CAFE_TAG_ASSIGNMENTS : has
-    CAFE_TAGS ||--o{ CAFE_TAG_ASSIGNMENTS : classifies
-    CAFES ||--o{ CAFE_DATA_SOURCES : sourced_from
-    COURSES ||--o{ COURSE_WAYPOINTS : contains
+    CAFES ||--o{ CAFE_TAG_ASSIGNMENTS : classified
+    CAFE_TAGS ||--o{ CAFE_TAG_ASSIGNMENTS : assigns
+    COURSES ||--o{ COURSE_PATHS : defines
+    COURSES ||--o{ COURSE_NAVIGATION_ANCHORS : navigates
     COURSES ||--o{ COURSE_CAFES : includes
-    CAFES ||--o{ COURSE_CAFES : destination_for
-    COURSES ||--o{ DRIVE_RECORDS : completed_as
-    CAFES ||--o{ DRIVE_RECORDS : visited_as
+    CAFES ||--o{ COURSE_CAFES : rests_at
+    COURSES ||--o{ DRIVE_RECORDS : completed_on
     DRIVE_RECORDS ||--o{ DRIVE_RECORD_POINTS : contains
-    RECOMMENDATION_REQUESTS ||--o{ RECOMMENDATION_RESULTS : produces
-    COURSES ||--o{ RECOMMENDATION_RESULTS : recommends
-    CAFES ||--o{ RECOMMENDATION_RESULTS : recommends
-
-    USERS {
-      bigint id PK
-      varchar nickname
-      varchar status
-      datetime created_at
-    }
-    USER_IDENTITIES {
-      bigint id PK
-      bigint user_id FK
-      varchar provider
-      varchar provider_subject
-      datetime linked_at
-    }
-    CAFES {
-      bigint id PK
-      varchar name
-      varchar address
-      decimal latitude
-      decimal longitude
-      varchar phone_number
-      varchar price_range
-      boolean parking_available
-      datetime verified_at
-    }
-    COURSES {
-      bigint id PK
-      varchar name
-      varchar region
-      integer estimated_duration_minutes
-      integer estimated_distance_meters
-      boolean is_active
-    }
-    DRIVE_RECORDS {
-      bigint id PK
-      bigint user_id FK
-      bigint course_id FK
-      bigint cafe_id FK
-      datetime started_at
-      datetime ended_at
-      integer distance_meters
-      integer duration_seconds
-      decimal average_speed_kph
-      varchar status
-    }
+    DRIVE_RECORDS ||--o{ DRIVE_RECORD_ANCHOR_PASSES : verifies
+    COURSE_NAVIGATION_ANCHORS ||--o{ DRIVE_RECORD_ANCHOR_PASSES : passed
 ```
 
-## 핵심 테이블
-
-| 테이블 | 목적 | 주요 제약·인덱스 |
+| 테이블 | 역할 | 상태 |
 | --- | --- | --- |
-| `users` | 서비스 사용자 | `status`로 탈퇴·정지 상태 관리 |
-| `user_identities` | 카카오/구글 계정 연결 | `(provider, provider_subject)` 유니크, `user_id` 인덱스 |
-| `user_consents` | 위치·약관 동의 이력 | 동의 문서 버전과 시각 보관 |
-| `cafes` | 검수된 카페 기본 정보 | 좌표 및 `is_active` 인덱스 |
-| `cafe_images` | 사용 권한이 확인된 카페 사진 | 표시 순서와 라이선스·출처 저장 |
-| `cafe_tags` | 분위기·뷰·편의시설 태그 사전 | `code` 유니크 |
-| `cafe_tag_assignments` | 카페-태그 다대다 관계 | `(cafe_id, tag_id)` 유니크 |
-| `cafe_data_sources` | 카페 정보 수집 출처·검수 이력 | 출처 URL, 수집·검수 시각 저장 |
-| `courses` | 운영자가 검수한 드라이브 코스 | 지역, 시간·거리, 공개 상태 |
-| `course_waypoints` | 코스의 순서 있는 경유지 | `(course_id, sequence)` 유니크 |
-| `course_cafes` | 코스와 목적지 카페 연결 | 추천 가중치와 연결 상태 저장 |
-| `favorites` | 사용자 즐겨찾기 | `(user_id, cafe_id)` 유니크 |
-| `cafe_reviews` | 서비스 내 사용자 리뷰 | 사용자당 카페별 1건 유니크 |
-| `recommendation_requests` | 추천 조건과 요청 이력 | 개인정보 최소화, 좌표는 정밀도 축소 저장 권장 |
-| `recommendation_results` | 후보별 점수·경로 추정값 | 요청별 순위 유니크 |
-| `drive_records` | 완주·중단된 드라이브 요약 | 사용자·시작 시각 복합 인덱스 |
-| `drive_record_points` | 선택적으로 저장하는 GPS 원본 | `(drive_record_id, recorded_at)` 복합 인덱스 |
+| `users`, `user_identities`, `user_consents` | 사용자·소셜 계정·동의 이력 | 구현 |
+| `cafes`, `cafe_images`, `cafe_tags` | 검수된 카페와 검색 조건 | 구현 |
+| `course_paths` | 전체 코스 폴리라인과 검증 기준 | 구현 |
+| `course_navigation_anchors` | TMAP에 전달할 시작·경유·도착점 | 구현 |
+| `course_cafes` | 코스의 카페 휴식 포인트 | 구현 |
+| `drive_records` | 주행 요약·기준 시간 차이·검증 결과 | 구현 |
+| `drive_record_points` | GPS 원본 포인트 | 구현 |
+| `drive_record_anchor_passes` | 필수 경유지 통과 증거 | 구현 |
 
-## 중요 설계 결정
+## 다음 마이그레이션에서 추가할 도메인
 
-### 소셜 계정 분리
+```mermaid
+erDiagram
+    USERS ||--o| USER_PROFILES : has
+    USERS ||--o{ USER_VEHICLES : owns
+    USERS ||--o{ FAVORITES : saves
+    CAFES ||--o{ FAVORITES : saved
+    COURSES ||--o{ DAILY_COURSE_RECOMMENDATIONS : selected
+    USERS ||--o{ POSTS : writes
+    POSTS ||--o{ POST_IMAGES : has
+    POSTS ||--o{ COMMENTS : receives
+    POSTS ||--o{ POST_LIKES : receives
+    USERS ||--o{ CREW_MEMBERS : joins
+    CREWS ||--o{ CREW_MEMBERS : contains
+    CREWS ||--o{ CREW_INVITATIONS : invites
+    CREWS ||--o{ CREW_MESSAGES : chats
+    CREWS ||--o{ CREW_COURSES : schedules
+    COURSES ||--o{ CREW_COURSES : references
+    CREW_COURSES ||--o{ DRIVE_RECORDS : ranks
+```
 
-`users`에 카카오 또는 구글 ID를 직접 넣지 않는다. `user_identities`를 두어 한 사용자가 두 제공자 계정을 연결할 수 있게 한다. 제공자 액세스 토큰은 영구 보관하지 않으며, 앱 로그인 후 서비스 자체 JWT만 사용한다.
+| 테이블 | 핵심 컬럼/제약 |
+| --- | --- |
+| `user_profiles` | `user_id` 유니크, 닉네임, 소개, 프로필 이미지 |
+| `user_vehicles` | 차종, 제조사, 모델, 대표 차량 여부 |
+| `favorites` | `(user_id, cafe_id)` 유니크 |
+| `daily_course_recommendations` | `(recommendation_date, display_order)` 유니크, 공통 추천 3개 |
+| `posts`, `post_images` | 작성자, 본문, 이미지 순서, 공개·삭제 상태 |
+| `comments`, `post_likes` | 대댓글 부모 ID, `(post_id, user_id)` 좋아요 유니크 |
+| `reports`, `user_blocks` | 커뮤니티 운영과 사용자 보호 |
+| `crews` | 공개 여부, 가입 정책, 소유자 |
+| `crew_members` | `(crew_id, user_id)` 유니크, OWNER/MANAGER/MEMBER |
+| `crew_invitations` | 초대 토큰 해시, 만료 시각, 사용 상태 |
+| `crew_messages` | 크루 내부 대화와 삭제 상태 |
+| `crew_courses` | 코스·기준 시간·FASTEST/CLOSEST_TO_BASELINE 랭킹 모드 |
 
-### 태그 정규화
+커뮤니티와 크루 테이블은 UI 흐름이 확정된 뒤 별도 Alembic 마이그레이션으로 추가한다.
+한 번에 모든 테이블을 확정하면 진행 중인 Figma 화면과 충돌할 가능성이 있기 때문이다.
+# 2026-07-15 MVP 확장 테이블
 
-주차·뷰·분위기 같은 조건을 열로 계속 추가하지 않는다. `cafe_tags`와 연결 테이블을 사용한다. 단, 조회가 매우 잦은 `parking_available`, 좌표, 가격대는 `cafes`에 유지한다.
+공개 번개와 크루 데이터가 섞이지 않도록 다음 관계를 추가했다.
 
-### GPS 저장
+```mermaid
+erDiagram
+    USERS ||--o{ LIGHTNING_COURSES : creates
+    USERS ||--o{ LIGHTNING_COURSE_PARTICIPANTS : joins
+    LIGHTNING_COURSES ||--o{ LIGHTNING_COURSE_PARTICIPANTS : has
+    LIGHTNING_COURSES ||--o{ DRIVE_RECORDS : records
+    CREWS ||--o{ CREW_COURSES : owns
+    CREW_COURSES ||--o{ DRIVE_RECORDS : records
+    CREWS ||--o{ CREW_DAILY_COURSE_RANKINGS : configures
+    COURSES ||--o{ CREW_DAILY_COURSE_RANKINGS : ranks
+    COURSES ||--o{ DRIVE_RECORDS : records
+```
 
-`drive_records`에는 사용자에게 보이는 요약값만 저장한다. 원본 좌표는 `drive_record_points`로 분리한다. 대량 데이터가 쌓이는 테이블이므로 보존 기간, 샘플링 간격, 삭제 정책을 별도 운영 정책으로 둔다.
-
-### 랭킹
-
-MVP에서는 `drive_records`를 집계해 코스 이용 수와 완주 수를 계산한다. 트래픽이 커진 뒤에만 일·주 단위 집계 테이블을 추가한다. 속도 순위는 제공하지 않는다.
+- `lightning_courses`: 전체 공개, 선택한 날짜 하루만 노출되는 출발지·목적지 기반 코스
+- `lightning_course_participants`: 공개 번개 참가자와 주행 권한
+- `crew_courses`: 크루원에게만 보이는 당일 번개코스
+- `crew_daily_course_rankings`: 동일한 오늘의 코스 기록을 크루원만 필터링하는 랭킹 규칙
+- `drive_records`: `course_id`, `crew_course_id`, `lightning_course_id` 중 정확히 하나를 사용

@@ -1,4 +1,4 @@
-# Drive Cafe API
+# WayPoint API
 
 ## Local run
 
@@ -7,6 +7,14 @@
 3. Install dependencies with `pip install -e .`.
 4. Run `alembic upgrade head`.
 5. Run `uvicorn app.main:app --reload`.
+
+Run project scripts from the `backend` directory with module syntax so the current worktree is
+used even when the shared virtual environment has another editable checkout registered:
+
+```powershell
+python -m scripts.seed_catalog --path data/catalog.json
+python -m scripts.set_admin --email you@example.com
+```
 
 Interactive API documentation is available at `/docs` in development.
 

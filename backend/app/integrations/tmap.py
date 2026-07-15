@@ -27,6 +27,14 @@ class RouteEstimate:
     taxi_fare: int | None
 
 
+@dataclass(frozen=True)
+class PlaceSearchItem:
+    name: str
+    latitude: float
+    longitude: float
+    address: str | None
+
+
 class TmapClient:
     """TMAP REST client.
 
@@ -119,3 +127,41 @@ class TmapClient:
             raise TmapError(f"TMAP route request returned HTTP {error.response.status_code}") from error
         except (httpx.HTTPError, ValueError, TypeError) as error:
             raise TmapError("TMAP route request failed") from error
+
+    async def search_places(self, keyword: str, *, count: int = 10) -> list[PlaceSearchItem]:
+        try:
+            async with httpx.AsyncClient(base_url=TMAP_API_BASE_URL, timeout=10.0) as client:
+                response = await client.get(
+                    "/pois",
+                    headers=self._headers(),
+                    params={
+                        "version": "1",
+                        "format": "json",
+                        "searchKeyword": keyword,
+                        "count": min(max(count, 1), 20),
+                        "resCoordType": "WGS84GEO",
+                    },
+                )
+            response.raise_for_status()
+            raw_items = (((response.json().get("searchPoiInfo") or {}).get("pois") or {}).get("poi") or [])
+            results: list[PlaceSearchItem] = []
+            for item in raw_items:
+                latitude = item.get("noorLat") or item.get("frontLat")
+                longitude = item.get("noorLon") or item.get("frontLon")
+                if latitude is None or longitude is None:
+                    continue
+                address_parts = [
+                    item.get("upperAddrName"), item.get("middleAddrName"),
+                    item.get("lowerAddrName"), item.get("detailAddrName"),
+                ]
+                results.append(PlaceSearchItem(
+                    name=item.get("name") or keyword,
+                    latitude=float(latitude),
+                    longitude=float(longitude),
+                    address=" ".join(part for part in address_parts if part) or None,
+                ))
+            return results
+        except httpx.HTTPStatusError as error:
+            raise TmapError(f"TMAP place search returned HTTP {error.response.status_code}") from error
+        except (httpx.HTTPError, ValueError, TypeError) as error:
+            raise TmapError("TMAP place search request failed") from error

@@ -47,7 +47,7 @@ async def social_login(payload: SocialLoginRequest, db: DbSession) -> TokenRespo
         )
     )
     if identity is None:
-        user = User(status=UserStatus.ACTIVE)
+        user = User(status=UserStatus.ACTIVE, nickname=profile.name)
         db.add(user)
         db.flush()
         identity = UserIdentity(
@@ -93,6 +93,7 @@ def read_me(current_user: CurrentUser) -> MeResponse:
         id=current_user.id,
         nickname=current_user.nickname,
         status=current_user.status,
+        role=current_user.role,
         identities=[
             {"provider": identity.provider, "linked_at": identity.linked_at}
             for identity in current_user.identities

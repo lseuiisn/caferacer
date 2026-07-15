@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.0" creator="GPSBabel - https://www.gpsbabel.org" xmlns="http://www.topografix.com/GPX/1/0">
+  <time>2026-07-14T17:28:15.308Z</time>
+  <bounds minlat="37.586556300" minlon="128.325448600" maxlat="37.609541800" maxlon="128.428531200"/>
+  <trk>
+    <name>선 1</name>
+    <trkseg>
+      <trkpt lat="37.598934000" lon="128.325448600">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.602810100" lon="128.331885900">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.604986100" lon="128.338838200">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.606754000" lon="128.343043900">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.605122100" lon="128.348622900">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.607773900" lon="128.353343500">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.609541800" lon="128.362613300">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.609269800" lon="128.372483800">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.601858100" lon="128.378921100">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.591589200" lon="128.384929200">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.587440400" lon="128.389306600">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.586556300" lon="128.394885600">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.590024900" lon="128.403812000">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.594717600" lon="128.415914100">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.597437900" lon="128.422866400">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.604510100" lon="128.425098000">
+        <ele>0.000</ele>
+      </trkpt>
+      <trkpt lat="37.606074000" lon="128.428531200">
+        <ele>0.000</ele>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

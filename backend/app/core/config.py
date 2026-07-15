@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     kakao_rest_api_key: str = ""
     tmap_app_key: str = ""
     cors_origins: str = ""
+    media_root: str = "media"
+    media_base_url: str = "/media"
+    max_image_bytes: int = Field(default=10_000_000, gt=0)
 
     @property
     def google_client_id_list(self) -> list[str]:

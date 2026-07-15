@@ -1,0 +1,156 @@
+{
+  "name": "테스트용 드라이브",
+  "description": null,
+  "region": "강원도 평창",
+  "estimated_duration_minutes": 120,
+  "estimated_distance_meters": 11801,
+  "difficulty": "normal",
+  "recommended_season": "all",
+  "recommended_time": "day",
+  "thumbnail_url": null,
+  "drive_suitability_score": 0.0,
+  "moods": [
+    "riverside",
+    "scenic"
+  ],
+  "cafe_ids": [],
+  "path": [
+    {
+      "sequence": 0,
+      "latitude": 37.598934,
+      "longitude": 128.3254486,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 1,
+      "latitude": 37.6028101,
+      "longitude": 128.3318859,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 2,
+      "latitude": 37.6049861,
+      "longitude": 128.3388382,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 3,
+      "latitude": 37.606754,
+      "longitude": 128.3430439,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 4,
+      "latitude": 37.6051221,
+      "longitude": 128.3486229,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 5,
+      "latitude": 37.6077739,
+      "longitude": 128.3533435,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 6,
+      "latitude": 37.6095418,
+      "longitude": 128.3626133,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 7,
+      "latitude": 37.6092698,
+      "longitude": 128.3724838,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 8,
+      "latitude": 37.6018581,
+      "longitude": 128.3789211,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 9,
+      "latitude": 37.5915892,
+      "longitude": 128.3849292,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 10,
+      "latitude": 37.5874404,
+      "longitude": 128.3893066,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 11,
+      "latitude": 37.5865563,
+      "longitude": 128.3948856,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 12,
+      "latitude": 37.5900249,
+      "longitude": 128.403812,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 13,
+      "latitude": 37.5947176,
+      "longitude": 128.4159141,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 14,
+      "latitude": 37.5974379,
+      "longitude": 128.4228664,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 15,
+      "latitude": 37.6045101,
+      "longitude": 128.425098,
+      "road_name": null,
+      "road_type": "unknown"
+    },
+    {
+      "sequence": 16,
+      "latitude": 37.606074,
+      "longitude": 128.4285312,
+      "road_name": null,
+      "road_type": "unknown"
+    }
+  ],
+  "navigation_anchors": [
+    {
+      "sequence": 0,
+      "name": "테스트용 드라이브 시작점",
+      "anchor_type": "start",
+      "latitude": 37.598934,
+      "longitude": 128.3254486,
+      "pass_radius_meters": 100
+    },
+    {
+      "sequence": 1,
+      "name": "테스트용 드라이브 도착점",
+      "anchor_type": "destination",
+      "latitude": 37.606074,
+      "longitude": 128.4285312,
+      "pass_radius_meters": 100
+    }
+  ]
+}

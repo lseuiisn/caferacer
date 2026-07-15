@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from app.models.enums import OAuthProvider, UserStatus
+from app.models.enums import OAuthProvider, UserStatus,UserRole
 
 
 class SocialLoginRequest(BaseModel):
@@ -30,4 +30,5 @@ class MeResponse(BaseModel):
     id: int
     nickname: str | None
     status: UserStatus
+    role: UserRole  # 추가
     identities: list[IdentityResponse]

@@ -6,7 +6,7 @@ from sqlalchemy import DateTime, Enum, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
-from app.models.enums import ConsentType, OAuthProvider, UserStatus
+from app.models.enums import ConsentType, OAuthProvider, UserRole, UserStatus
 
 
 class User(TimestampMixin, Base):
@@ -17,6 +17,7 @@ class User(TimestampMixin, Base):
     status: Mapped[UserStatus] = mapped_column(
         Enum(UserStatus, native_enum=False), default=UserStatus.ACTIVE, index=True
     )
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole, native_enum=False), default=UserRole.USER, index=True)
     identities: Mapped[list[UserIdentity]] = relationship(back_populates="user")
     consents: Mapped[list[UserConsent]] = relationship(back_populates="user")
     refresh_sessions: Mapped[list[RefreshSession]] = relationship(back_populates="user")

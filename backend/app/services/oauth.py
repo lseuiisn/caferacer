@@ -17,6 +17,7 @@ class OAuthProfile:
     provider: OAuthProvider
     subject: str
     email: str | None
+    name: str | None = None
 
 
 class OAuthProfileVerifier:
@@ -43,7 +44,7 @@ class OAuthProfileVerifier:
         subject = claims.get("sub")
         if not subject:
             raise OAuthValidationError("Google token does not include a subject")
-        return OAuthProfile(OAuthProvider.GOOGLE, subject, claims.get("email"))
+        return OAuthProfile(OAuthProvider.GOOGLE, subject, claims.get("email"), claims.get("name"))
 
     async def _verify_kakao(self, access_token: str) -> OAuthProfile:
         try:
@@ -61,4 +62,5 @@ class OAuthProfileVerifier:
         if subject is None:
             raise OAuthValidationError("Kakao token does not include a subject")
         kakao_account = payload.get("kakao_account") or {}
-        return OAuthProfile(OAuthProvider.KAKAO, str(subject), kakao_account.get("email"))
+        nickname = (kakao_account.get("profile") or {}).get("nickname")
+        return OAuthProfile(OAuthProvider.KAKAO, str(subject), kakao_account.get("email"), nickname)
