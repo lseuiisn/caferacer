@@ -14,19 +14,25 @@ class TmapNavigationGateway implements NavigationGateway {
     List<NavigationPoint> waypoints = const [],
   }) async {
     if (waypoints.length > 10) {
-      throw ArgumentError.value(waypoints.length, 'waypoints', '최대 10개');
+      throw ArgumentError.value(waypoints.length, 'waypoints', 'Maximum is 10');
     }
     if (!Platform.isAndroid) {
       throw const NavigationNotConfiguredException();
     }
     try {
       await _channel.invokeMethod<bool>('startGuidance', {
-        'name': destination.name ?? '코스 시작점',
-        'latitude': destination.latitude,
-        'longitude': destination.longitude,
+        'origin': _encodePoint(origin),
+        'destination': _encodePoint(destination),
+        'waypoints': waypoints.map(_encodePoint).toList(growable: false),
       });
     } on PlatformException catch (error) {
-      throw StateError(error.message ?? 'TMAP 길안내를 실행하지 못했습니다.');
+      throw StateError(error.message ?? 'Could not start TMAP guidance.');
     }
   }
+
+  Map<String, Object?> _encodePoint(NavigationPoint point) => {
+    'name': point.name,
+    'latitude': point.latitude,
+    'longitude': point.longitude,
+  };
 }

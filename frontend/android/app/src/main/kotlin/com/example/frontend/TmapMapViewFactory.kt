@@ -7,12 +7,13 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import com.skt.Tmap.TMapMarkerItem
-import com.skt.Tmap.TMapPoint
-import com.skt.Tmap.TMapPolyLine
-import com.skt.Tmap.TMapView
-import com.skt.Tmap.poi_item.TMapPOIItem
+import com.skt.tmap.TMapPoint
+import com.skt.tmap.TMapView
+import com.skt.tmap.overlay.TMapMarkerItem
+import com.skt.tmap.overlay.TMapPolyLine
+import com.skt.tmap.poi.TMapPOIItem
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.StandardMessageCodec
@@ -37,26 +38,30 @@ private class TmapMapPlatformView(
         messenger,
         args["channel"] as? String ?: "waypoint/tmap_map",
     )
-    private val mapView = TMapView(context)
+    private val rootView = LayoutInflater.from(context)
+        .inflate(R.layout.tmap_platform_view, null, false)
+    private val mapView = rootView.findViewById<TMapView>(R.id.tmap_view)
 
     init {
         val apiKey = BuildConfig.TMAP_MAP_API_KEY
         check(apiKey.isNotBlank()) {
             "TMAP_MAP_API_KEY is missing. Add it to android/local.properties."
         }
-        mapView.setHttpsMode(true)
         mapView.setSKTMapApiKey(apiKey)
-        configureCenter(args["center"] as? Map<*, *>, args["zoom"] as? Number)
-        configurePolyline(args["polylines"] as? List<*>)
-        configureMarkers(args["markers"] as? List<*>)
-        mapView.setClick()
-        mapView.setOnClickListenerCallBack(object : TMapView.OnClickListenerCallback {
-            override fun onPressEvent(
+        mapView.setOnMapReadyListener(object : TMapView.OnMapReadyListener {
+            override fun onMapReady() {
+                configureCenter(args["center"] as? Map<*, *>, args["zoom"] as? Number)
+                configurePolyline(args["polylines"] as? List<*>)
+                configureMarkers(args["markers"] as? List<*>)
+            }
+        })
+        mapView.setOnClickListenerCallback(object : TMapView.OnClickListenerCallback {
+            override fun onPressDown(
                 markers: ArrayList<TMapMarkerItem>,
                 poiItems: ArrayList<TMapPOIItem>,
                 point: TMapPoint,
                 screenPoint: PointF,
-            ): Boolean {
+            ) {
                 val marker = markers.firstOrNull()
                 marker?.id?.let { id ->
                     channel.invokeMethod("markerTapped", mapOf("id" to id))
@@ -67,22 +72,22 @@ private class TmapMapPlatformView(
                         mapOf("latitude" to point.latitude, "longitude" to point.longitude),
                     )
                 }
-                return true
             }
 
-            override fun onPressUpEvent(
+            override fun onPressUp(
                 markers: ArrayList<TMapMarkerItem>,
                 poiItems: ArrayList<TMapPOIItem>,
                 point: TMapPoint,
                 screenPoint: PointF,
-            ): Boolean = true
+            ) = Unit
         })
+        mapView.onResume()
     }
 
     private fun configureCenter(center: Map<*, *>?, zoom: Number?) {
         val latitude = (center?.get("latitude") as? Number)?.toDouble() ?: return
         val longitude = (center["longitude"] as? Number)?.toDouble() ?: return
-        mapView.setCenterPoint(longitude, latitude)
+        mapView.setCenterPoint(latitude, longitude)
         mapView.setZoomLevel(zoom?.toInt() ?: 12)
     }
 
@@ -93,7 +98,7 @@ private class TmapMapPlatformView(
             val longitude = (marker["longitude"] as? Number)?.toDouble() ?: return@forEach
             val id = marker["id"]?.toString() ?: return@forEach
             val item = TMapMarkerItem().apply {
-                setID(id)
+                setId(id)
                 setTMapPoint(TMapPoint(latitude, longitude))
                 setName(marker["title"]?.toString() ?: "")
                 setCalloutTitle(marker["title"]?.toString() ?: "")
@@ -101,7 +106,7 @@ private class TmapMapPlatformView(
                 setCanShowCallout(true)
                 setIcon(markerBitmap(marker["color"]?.toString()))
             }
-            mapView.addMarkerItem(id, item)
+            mapView.addTMapMarkerItem(item)
         }
     }
 
@@ -110,8 +115,14 @@ private class TmapMapPlatformView(
             val lineData = raw as? Map<*, *> ?: return@forEachIndexed
             val points = lineData["points"] as? List<*> ?: return@forEachIndexed
             val polyline = TMapPolyLine().apply {
-                setLineColor(Color.rgb(38, 99, 235))
-                setLineWidth(8f)
+                setID(lineData["id"]?.toString() ?: "course_$index")
+                setLineColor(
+                    runCatching {
+                        Color.parseColor(lineData["color"]?.toString() ?: "#111111")
+                    }.getOrDefault(Color.BLACK),
+                )
+                setLineAlpha(255)
+                setLineWidth((lineData["width"] as? Number)?.toFloat() ?: 8f)
             }
             points.forEach { point ->
                 val pair = point as? List<*> ?: return@forEach
@@ -119,17 +130,17 @@ private class TmapMapPlatformView(
                 val longitude = (pair.getOrNull(1) as? Number)?.toDouble() ?: return@forEach
                 polyline.addLinePoint(TMapPoint(latitude, longitude))
             }
-            mapView.addTMapPolyLine("course_$index", polyline)
+            mapView.addTMapPolyLine(polyline)
         }
     }
 
     private fun markerBitmap(type: String?): Bitmap {
         val color = when (type) {
-            "start" -> Color.rgb(22, 163, 74)
-            "destination" -> Color.rgb(220, 38, 38)
-            "waypoint" -> Color.rgb(234, 88, 12)
-            "cafe" -> Color.rgb(120, 53, 15)
-            else -> Color.rgb(37, 99, 235)
+            "start" -> Color.rgb(200, 255, 0)
+            "destination" -> Color.rgb(17, 17, 17)
+            "waypoint" -> Color.rgb(255, 122, 0)
+            "cafe" -> Color.rgb(17, 17, 17)
+            else -> Color.rgb(50, 116, 246)
         }
         return Bitmap.createBitmap(48, 48, Bitmap.Config.ARGB_8888).also { bitmap ->
             Canvas(bitmap).drawCircle(24f, 24f, 16f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -139,10 +150,13 @@ private class TmapMapPlatformView(
         }
     }
 
-    override fun getView(): View = mapView
+    override fun getView(): View = rootView
 
     override fun dispose() {
-        runCatching { mapView.destroy() }
+        runCatching {
+            mapView.onPause()
+            mapView.onDestroy()
+        }
             .onFailure { Log.w("WayPoint", "TMAP view disposal failed", it) }
     }
 }

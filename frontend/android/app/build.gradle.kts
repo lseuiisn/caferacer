@@ -29,7 +29,7 @@ android {
         applicationId = "com.example.frontend"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -50,14 +50,22 @@ android {
 }
 
 dependencies {
+    implementation("androidx.appcompat:appcompat:1.5.0")
+    implementation("com.google.android.material:material:1.6.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation(
-        fileTree(
-            mapOf(
-                "dir" to "../libs/[Android]TmapSDK_1.77/[Android]TmapSDK_1.77/lib",
-                "include" to listOf("*.jar"),
-            ),
+        files(
+            "../libs/[Android]TMapVSMSDK_3.7/[Android]TMapVSMSDK_3.7/lib/" +
+                "tmap-sdk-3.7.aar",
         ),
     )
+    implementation(
+        files(
+            "../libs/[Android]TMapVSMSDK_3.7/[Android]TMapVSMSDK_3.7/lib/" +
+                "vsm-tmap-sdk-v2-eaa-2.0.14.aar",
+        ),
+    )
+    implementation("com.google.flatbuffers:flatbuffers-java:24.3.25")
 }
 
 kotlin {

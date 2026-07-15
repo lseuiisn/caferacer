@@ -1,6 +1,9 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 class TmapNativeMarker {
@@ -30,6 +33,27 @@ class TmapNativeMarker {
   };
 }
 
+class TmapNativePolyline {
+  const TmapNativePolyline({
+    required this.id,
+    required this.points,
+    this.color = '#111111',
+    this.width = 8,
+  });
+
+  final String id;
+  final List<List<double>> points;
+  final String color;
+  final double width;
+
+  Map<String, Object> toJson() => {
+    'id': id,
+    'points': points,
+    'color': color,
+    'width': width,
+  };
+}
+
 class TmapNativeMap extends StatefulWidget {
   const TmapNativeMap({
     required this.centerLatitude,
@@ -45,7 +69,7 @@ class TmapNativeMap extends StatefulWidget {
   final double centerLatitude;
   final double centerLongitude;
   final List<TmapNativeMarker> markers;
-  final List<List<List<double>>> polylines;
+  final List<TmapNativePolyline> polylines;
   final int zoom;
   final ValueChanged<String>? onMarkerTap;
   final void Function(double latitude, double longitude)? onMapTap;
@@ -83,10 +107,8 @@ class _TmapNativeMapState extends State<TmapNativeMap> {
   }
 
   @override
-  Widget build(BuildContext context) => AndroidView(
-    viewType: 'waypoint/tmap_map',
-    layoutDirection: TextDirection.ltr,
-    creationParams: {
+  Widget build(BuildContext context) {
+    final creationParams = <String, Object>{
       'channel': _channelName,
       'center': {
         'latitude': widget.centerLatitude,
@@ -94,10 +116,28 @@ class _TmapNativeMapState extends State<TmapNativeMap> {
       },
       'zoom': widget.zoom,
       'markers': widget.markers.map((marker) => marker.toJson()).toList(),
-      'polylines': widget.polylines
-          .map((points) => {'points': points})
-          .toList(),
-    },
-    creationParamsCodec: const StandardMessageCodec(),
-  );
+      'polylines': widget.polylines.map((line) => line.toJson()).toList(),
+    };
+
+    return PlatformViewLink(
+      viewType: 'waypoint/tmap_map',
+      surfaceFactory: (context, controller) => AndroidViewSurface(
+        controller: controller as AndroidViewController,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      ),
+      onCreatePlatformView: (params) {
+        return PlatformViewsService.initExpensiveAndroidView(
+            id: params.id,
+            viewType: 'waypoint/tmap_map',
+            layoutDirection: TextDirection.ltr,
+            creationParams: creationParams,
+            creationParamsCodec: const StandardMessageCodec(),
+            onFocus: () => params.onFocusChanged(true),
+          )
+          ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
+          ..create();
+      },
+    );
+  }
 }
