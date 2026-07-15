@@ -66,18 +66,23 @@ def upgrade() -> None:
     for column in ["crew_id", "course_id", "created_by_user_id", "recommendation_date", "ranking_mode"]:
         op.create_index(f"ix_crew_daily_course_rankings_{column}", "crew_daily_course_rankings", [column])
 
-    op.add_column("drive_records", sa.Column("lightning_course_id", sa.BigInteger()))
-    op.create_foreign_key(
-        "fk_drive_records_lightning_course_id_lightning_courses",
-        "drive_records", "lightning_courses", ["lightning_course_id"], ["id"], ondelete="SET NULL",
-    )
+    with op.batch_alter_table("drive_records") as batch_op:
+        batch_op.add_column(sa.Column("lightning_course_id", sa.BigInteger()))
+        batch_op.create_foreign_key(
+            "fk_drive_records_lightning_course_id_lightning_courses",
+            "lightning_courses",
+            ["lightning_course_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
     op.create_index("ix_drive_records_lightning_course_id", "drive_records", ["lightning_course_id"])
 
 
 def downgrade() -> None:
     op.drop_index("ix_drive_records_lightning_course_id", table_name="drive_records")
-    op.drop_constraint("fk_drive_records_lightning_course_id_lightning_courses", "drive_records", type_="foreignkey")
-    op.drop_column("drive_records", "lightning_course_id")
+    with op.batch_alter_table("drive_records") as batch_op:
+        batch_op.drop_constraint("fk_drive_records_lightning_course_id_lightning_courses", type_="foreignkey")
+        batch_op.drop_column("lightning_course_id")
     op.drop_table("crew_daily_course_rankings")
     op.drop_table("lightning_course_participants")
     op.drop_table("lightning_courses")

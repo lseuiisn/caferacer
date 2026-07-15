@@ -2,6 +2,8 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql.sqltypes import BigInteger
 
 from app.core.config import get_settings
 from app.models import Base
@@ -15,12 +17,19 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+@compiles(BigInteger, "sqlite")
+def compile_big_integer_as_integer(_type, _compiler, **_kwargs) -> str:
+    """SQLite auto-increment primary keys must be declared as INTEGER."""
+    return "INTEGER"
+
+
 def run_migrations_offline() -> None:
     context.configure(
         url=config.get_main_option("sqlalchemy.url"),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        render_as_batch=config.get_main_option("sqlalchemy.url").startswith("sqlite"),
     )
     with context.begin_transaction():
         context.run_migrations()
@@ -31,7 +40,11 @@ def run_migrations_online() -> None:
         config.get_section(config.config_ini_section, {}), prefix="sqlalchemy.", poolclass=pool.NullPool
     )
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            render_as_batch=connection.dialect.name == "sqlite",
+        )
         with context.begin_transaction():
             context.run_migrations()
 

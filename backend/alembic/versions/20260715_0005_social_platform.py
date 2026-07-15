@@ -31,7 +31,8 @@ def timestamps() -> list[sa.Column]:
 
 
 def upgrade() -> None:
-    op.alter_column("drive_records", "course_id", existing_type=sa.BigInteger(), nullable=True)
+    with op.batch_alter_table("drive_records") as batch_op:
+        batch_op.alter_column("course_id", existing_type=sa.BigInteger(), nullable=True)
     op.create_table(
         "user_profiles",
         sa.Column("user_id", sa.BigInteger(), sa.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
@@ -206,23 +207,24 @@ def upgrade() -> None:
     for column in ["crew_id", "created_by_user_id", "ranking_mode", "is_active"]:
         op.create_index(f"ix_crew_courses_{column}", "crew_courses", [column])
 
-    op.add_column("drive_records", sa.Column("crew_course_id", sa.BigInteger()))
-    op.create_foreign_key(
-        "fk_drive_records_crew_course_id_crew_courses",
-        "drive_records",
-        "crew_courses",
-        ["crew_course_id"],
-        ["id"],
-        ondelete="SET NULL",
-    )
+    with op.batch_alter_table("drive_records") as batch_op:
+        batch_op.add_column(sa.Column("crew_course_id", sa.BigInteger()))
+        batch_op.create_foreign_key(
+            "fk_drive_records_crew_course_id_crew_courses",
+            "crew_courses",
+            ["crew_course_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
     op.create_index("ix_drive_records_crew_course_id", "drive_records", ["crew_course_id"])
 
 
 def downgrade() -> None:
     op.drop_index("ix_drive_records_crew_course_id", table_name="drive_records")
-    op.drop_constraint("fk_drive_records_crew_course_id_crew_courses", "drive_records", type_="foreignkey")
-    op.drop_column("drive_records", "crew_course_id")
-    op.alter_column("drive_records", "course_id", existing_type=sa.BigInteger(), nullable=False)
+    with op.batch_alter_table("drive_records") as batch_op:
+        batch_op.drop_constraint("fk_drive_records_crew_course_id_crew_courses", type_="foreignkey")
+        batch_op.drop_column("crew_course_id")
+        batch_op.alter_column("course_id", existing_type=sa.BigInteger(), nullable=False)
     for table in [
         "crew_courses",
         "crew_messages",

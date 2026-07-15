@@ -8,3 +8,6 @@ backend/.coverage
 backend/htmlcov/
 backend/*.egg-info/
 backend/data/catalog.json
+backend/*.db
+backend/*.db-shm
+backend/*.db-wal

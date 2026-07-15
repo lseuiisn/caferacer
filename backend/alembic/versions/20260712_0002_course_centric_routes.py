@@ -15,11 +15,12 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.alter_column("courses", "summary", new_column_name="description", existing_type=sa.Text())
-    op.add_column("courses", sa.Column("difficulty", sa.String(length=20), nullable=False, server_default="normal"))
-    op.add_column("courses", sa.Column("recommended_season", sa.String(length=20), nullable=False, server_default="all"))
-    op.add_column("courses", sa.Column("recommended_time", sa.String(length=20), nullable=False, server_default="day"))
-    op.add_column("courses", sa.Column("thumbnail_url", sa.String(length=500), nullable=True))
+    with op.batch_alter_table("courses") as batch_op:
+        batch_op.alter_column("summary", new_column_name="description", existing_type=sa.Text())
+        batch_op.add_column(sa.Column("difficulty", sa.String(length=20), nullable=False, server_default="normal"))
+        batch_op.add_column(sa.Column("recommended_season", sa.String(length=20), nullable=False, server_default="all"))
+        batch_op.add_column(sa.Column("recommended_time", sa.String(length=20), nullable=False, server_default="day"))
+        batch_op.add_column(sa.Column("thumbnail_url", sa.String(length=500), nullable=True))
     op.create_index("ix_courses_difficulty", "courses", ["difficulty"])
     op.create_index("ix_courses_recommended_season", "courses", ["recommended_season"])
 
@@ -55,13 +56,17 @@ def upgrade() -> None:
     )
     op.drop_table("course_waypoints")
 
-    op.add_column("course_cafes", sa.Column("stop_order", sa.Integer(), nullable=False, server_default="1"))
-    op.create_unique_constraint("uq_course_cafes_course_id_stop_order", "course_cafes", ["course_id", "stop_order"])
+    with op.batch_alter_table("course_cafes") as batch_op:
+        batch_op.add_column(sa.Column("stop_order", sa.Integer(), nullable=False, server_default="1"))
+        batch_op.create_unique_constraint(
+            "uq_course_cafes_course_id_stop_order", ["course_id", "stop_order"]
+        )
 
 
 def downgrade() -> None:
-    op.drop_constraint("uq_course_cafes_course_id_stop_order", "course_cafes", type_="unique")
-    op.drop_column("course_cafes", "stop_order")
+    with op.batch_alter_table("course_cafes") as batch_op:
+        batch_op.drop_constraint("uq_course_cafes_course_id_stop_order", type_="unique")
+        batch_op.drop_column("stop_order")
     op.create_table(
         "course_waypoints",
         sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=True),
@@ -85,8 +90,9 @@ def downgrade() -> None:
     op.drop_table("course_tags")
     op.drop_index("ix_courses_recommended_season", table_name="courses")
     op.drop_index("ix_courses_difficulty", table_name="courses")
-    op.drop_column("courses", "thumbnail_url")
-    op.drop_column("courses", "recommended_time")
-    op.drop_column("courses", "recommended_season")
-    op.drop_column("courses", "difficulty")
-    op.alter_column("courses", "description", new_column_name="summary", existing_type=sa.Text())
+    with op.batch_alter_table("courses") as batch_op:
+        batch_op.drop_column("thumbnail_url")
+        batch_op.drop_column("recommended_time")
+        batch_op.drop_column("recommended_season")
+        batch_op.drop_column("difficulty")
+        batch_op.alter_column("description", new_column_name="summary", existing_type=sa.Text())
